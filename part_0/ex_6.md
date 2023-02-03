@@ -9,5 +9,5 @@ sequenceDiagram
     B->>+S: POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
     Note right of B: payload :{note:'text',date: 'date'}
     S-->>-B: Resource Created(201)
-    Note right of B: payload :new note added without redirect
+    Note right of B: new note added without redirect/reload
 ```
