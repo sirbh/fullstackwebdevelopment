@@ -14,21 +14,23 @@ const Content = ({ parts }) => (
   </>
 );
 
+const Total = ({ parts }) => {
+  const total = parts.reduce((totalExc, part) => {
+    totalExc = totalExc + part.exercises;
+    return totalExc;
+  });
+
+  return <h4>total of {total} exercises</h4>;
+};
+
 const Course = ({ course }) => {
   return (
     <>
       <Header course={course.name} />
       <Content parts={course.parts} />
-      <h4>
-        total of{" "}
-        {course.parts.reduce((totalExc, part) => {
-          totalExc = totalExc + part.exercises;
-          return totalExc;
-        }, 0)}{" "}
-        exercises
-      </h4>
+      <Total parts={course.parts} />
     </>
   );
 };
 
-export default Course
+export default Course;
