@@ -19,6 +19,12 @@ const Course = ({ course }) => {
     <>
       <Header course={course.name} />
       <Content parts={course.parts} />
+      <h4>
+        {course.parts.reduce((totalExc, part) => {
+          totalExc = totalExc + part.exercises;
+          return totalExc;
+        }, 0)}
+      </h4>
     </>
   );
 };
