@@ -14,17 +14,25 @@ const App = () => {
 
   const onSubmit = (event) => {
     event.preventDefault();
-    const person = {
+    const _person = {
       name: event.target[0].value,
     };
 
-    setPersons(persons=>{
-      const updatedPersons = [...persons]
-      updatedPersons.push(person)
-      return updatedPersons
-    })
+    const existingPerson = persons.find(
+      (person) =>
+        person.name.toLocaleLowerCase() === _person.name.toLocaleLowerCase()
+    );
+    if (existingPerson) {
+      window.alert(`${existingPerson.name} is aleready added in the phonebook`);
+      return;
+    }
+    setPersons((persons) => {
+      const updatedPersons = [...persons];
+      updatedPersons.push(_person);
+      return updatedPersons;
+    });
 
-    setNewName("")
+    setNewName("");
   };
 
   return (
