@@ -83,7 +83,9 @@ const App = () => {
             setMessage(null)
           },5000)
           
-        });
+        }).catch(error=>{
+          setError(`Cannot update ${_person.name} it is already deleted`)
+        })
       }
 
       return;
