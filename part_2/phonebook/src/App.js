@@ -1,76 +1,22 @@
 import { useEffect, useState } from "react";
 import services from "./services";
+import './index.css'
+import Error from "./components/Error";
+import Notification from "./components/Notification";
+import Persons from "./components/Persons";
+import SearchFilter from "./components/SearchFilter";
+import AddPersonForm from "./components/AddPersonForm";
 
-const Person = ({ person, handleDelete }) => {
-  return (
-    <p>
-      {person.name} {person.number}{" "}
-      <button
-        onClick={() => {
-          handleDelete(person.id, person.name);
-        }}
-      >
-        delete
-      </button>
-    </p>
-  );
-};
 
-const Persons = ({ persons, query, handleDelete }) => {
-  return (
-    <div>
-      {persons
-        .filter((person) =>
-          person.name.toLowerCase().includes(query.toLowerCase())
-        )
-        .map((person) => {
-          return (
-            <Person
-              person={person}
-              handleDelete={handleDelete}
-              key={person.id}
-            />
-          );
-        })}
-    </div>
-  );
-};
 
-const SearchFilter = ({ query, queryChangeHandler }) => {
-  return (
-    <div>
-      name: <input value={query} onChange={queryChangeHandler} />
-    </div>
-  );
-};
-
-const AddPersonForm = ({
-  name,
-  nameChangeHandler,
-  number,
-  numberChangeHandler,
-  onSubmit,
-}) => {
-  return (
-    <form onSubmit={onSubmit}>
-      <div>
-        name: <input value={name} onChange={nameChangeHandler} />
-      </div>
-      <div>
-        number: <input value={number} onChange={numberChangeHandler} />
-      </div>
-      <div>
-        <button type="submit">add</button>
-      </div>
-    </form>
-  );
-};
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [number, setNumber] = useState("");
   const [query, setQuery] = useState("");
+  const [message, setMessage] = useState(null);
+  const [error,setError] = useState(null)
 
   useEffect(() => {
     services.getAll().then((resposne) => {
@@ -97,7 +43,13 @@ const App = () => {
           const filteredPersons = persons.filter((person) => person.id !== id);
           setPersons(filteredPersons);
         });
-      });
+      }).catch((error)=>{
+        const deletedPerson = persons.find(person=>person.id===id)
+        setError(`Information of ${deletedPerson.name} has already been removed from server`)
+        setTimeout(()=>{
+          setError(null)
+        },5000)
+      })
     }
   };
 
@@ -112,18 +64,29 @@ const App = () => {
       (person) => person.name.toLowerCase() === _person.name.toLowerCase()
     );
     if (existingPerson) {
-      if(window.confirm(`${existingPerson.name} is already added to the phonebook, replace the old number with a new one?`)){
-        services.updatePerson(existingPerson.id,_person).then(response=>{
-          const existingPersonIndex = persons.findIndex(person=>person.id===existingPerson.id)
-          setPersons(persons=>{
-            const copyPersons = [...persons]
-            copyPersons[existingPersonIndex].number = _person.number
-            return copyPersons
-          })
-        })
+      if (
+        window.confirm(
+          `${existingPerson.name} is already added to the phonebook, replace the old number with a new one?`
+        )
+      ) {
+        services.updatePerson(existingPerson.id, _person).then((response) => {
+          const existingPersonIndex = persons.findIndex(
+            (person) => person.id === existingPerson.id
+          );
+          setPersons((persons) => {
+            const copyPersons = [...persons];
+            copyPersons[existingPersonIndex].number = _person.number;
+            return copyPersons;
+          });
+          setMessage(`Updated ${_person.name}`)
+          setTimeout(()=>{
+            setMessage(null)
+          },5000)
+          
+        });
       }
 
-      return
+      return;
     }
     services.addPerson(_person).then((response) => {
       setPersons((persons) => {
@@ -131,6 +94,10 @@ const App = () => {
         copyPersons.push(response.data);
         return copyPersons;
       });
+      setMessage(`Added ${_person.name}`)
+      setTimeout(()=>{
+        setMessage(null)
+      },5000)
     });
 
     setNewName("");
@@ -140,6 +107,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Error message={error} />
+      <Notification message={message} />
       <SearchFilter query={query} queryChangeHandler={queryChangeHandler} />
       <h2>add a new</h2>
       <AddPersonForm
